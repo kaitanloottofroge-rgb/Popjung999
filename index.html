@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>popjung999</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html, body { height:100%; }
+
+  body {
+    font-family: 'Segoe UI', 'Noto Sans Thai', 'Helvetica Neue', sans-serif;
+    background: #07070a;
+    color: #e8e8ef;
+    overflow: hidden;
+  }
+
+  /* -------- พื้นหลังกริดไฮเทค -------- */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,163,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,163,.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+    pointer-events:none;
+    z-index:0;
+  }
+  body::after {
+    content:'';
+    position:fixed; inset:0;
+    background: radial-gradient(circle at 50% 0%, rgba(0,255,163,.10), transparent 55%),
+                radial-gradient(circle at 50% 100%, rgba(0,180,255,.07), transparent 55%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* -------- หน้าจอ -------- */
+  .screen {
+    position: fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    padding: 20px;
+    z-index: 10;
+  }
+
+  /* -------- การ์ดโมดัล -------- */
+  .modal {
+    position: relative;
+    background: linear-gradient(160deg, #14151b 0%, #0b0c10 100%);
+    border: 1px solid rgba(0,255,163,.28);
+    border-radius: 18px;
+    padding: 38px 34px;
+    text-align: center;
+    width: 100%;
+    max-width: 430px;
+    box-shadow: 0 0 70px rgba(0,255,163,.13), inset 0 0 60px rgba(0,0,0,.7);
+    animation: popIn .35s cubic-bezier(.2,.9,.3,1.4);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(.88) translateY(14px); opacity:0; }
+    to   { transform: scale(1) translateY(0); opacity:1; }
+  }
+
+  .logo {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #00ffa3;
+    text-shadow: 0 0 22px rgba(0,255,163,.75);
+    margin-bottom: 20px;
+    word-break: break-word;
+  }
+
+  .modal p {
+    font-size: 17px;
+    line-height: 1.65;
+    color: #c9d4d0;
+    margin-bottom: 26px;
+  }
+
+  /* -------- ปุ่ม -------- */
+  button {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: .6px;
+    padding: 13px 34px;
+    border: none;
+    border-radius: 11px;
+    cursor: pointer;
+    color: #00190f;
+    background: linear-gradient(180deg, #00ffa3 0%, #00b874 100%);
+    box-shadow: 0 6px 22px rgba(0,255,163,.28);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,255,163,.45); }
+  button:active:not(:disabled) { transform: translateY(0) scale(.97); }
+  button:disabled { filter: grayscale(.7) brightness(.6); cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    color: #00ffa3;
+    border: 1px solid rgba(0,255,163,.45);
+    box-shadow: none;
+  }
+  .btn-ghost:hover { background: rgba(0,255,163,.1); box-shadow: 0 0 22px rgba(0,255,163,.25); }
+
+  .row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+  /* ================= หน้าเกม ================= */
+  #gameScreen {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+    z-index: 5;
+  }
+
+  header {
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 22px;
+    border-bottom: 1px solid rgba(0,255,163,.16);
+    background: linear-gradient(180deg, rgba(0,255,163,.07), transparent);
+    z-index: 2;
+    gap: 12px;
+  }
+
+  .brand {
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: #00ffa3;
+    text-shadow: 0 0 18px rgba(0,255,163,.7);
+  }
+
+  .balance {
+    font-weight: 800;
+    font-size: 17px;
+    color: #00ffa3;
+    background: rgba(0,255,163,.09);
+    border: 1px solid rgba(0,255,163,.32);
+    padding: 7px 17px;
+    border-radius: 10px;
+    box-shadow: inset 0 0 18px rgba(0,255,163,.08), 0 0 20px rgba(0,255,163,.1);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  main {
+    flex: 1;
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    padding: 22px;
+    position: relative;
+    z-index: 1;
+    overflow-y: auto;
+  }
+
+  .table {
+    display:flex;
+    gap: 56px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .side {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 13px;
+    min-width: 210px;
+  }
+
+  .side .label {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #6f8079;
+    font-weight: 700;
+  }
+
+  .cards {
+    display:flex;
+    gap: 9px;
+    min-height: 112px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #00ffa3;
+    min-height: 20px;
+    text-shadow: 0 0 14px rgba(0,255,163,.55);
+  }
+
+  /* -------- ไพ่ -------- */
+  .card {
+    width: 76px; height: 108px;
+    border-radius: 9px;
+    background: linear-gradient(160deg, #1c1e25 0%, #0e0f14 100%);
+    border: 1px solid rgba(0,255,163,.35);
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-weight: 900;
+    box-shadow: 0 6px 18px rgba(0,0,0,.7), inset 0 0 22px rgba(0,255,163,.05);
+    animation: dealIn .32s cubic-bezier(.2,.9,.3,1.3);
+    user-select: none;
+  }
+
+  @keyframes dealIn {
+    from { transform: translateY(-22px) rotate(-6deg) scale(.85); opacity: 0; }
+    to   { transform: translateY(0) rotate(0) scale(1); opacity: 1; }
+  }
+
+  .card .rank { font-size: 25px; line-height: 1; color:#eaf5f1; }
+  .card .suit { font-size: 21px; line-height: 1; color:#7fe9c2; }
+
+  .card.red .rank { color:#ff7a90; }
+  .card.red .suit { color:#ff4d6d; }
+  .card.red { border-color: rgba(255,77,109,.4); }
+
+  .card.back {
+    background: repeating-linear-gradient(45deg, #0c1a15 0 7px, #102a20 7px 14px);
+    border-color: rgba(0,255,163,.45);
+    box-shadow: 0 6px 18px rgba(0,0,0,.7), inset 0 0 30px rgba(0,255,163,.12);
+  }
+  .card.back::after {
+    content:'★';
+    font-size: 26px;
+    color: rgba(0,255,163,.45);
+    text-shadow: 0 0 14px rgba(0,255,163,.7);
+  }
+
+  /* -------- ข้อความผลลัพธ์ -------- */
+  .msg {
+    min-height: 30px;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: .4px;
+    text-align: center;
+    transition: .2s;
+  }
+  .msg.win  { color:#00ffa3; text-shadow: 0 0 22px rgba(0,255,163,.8); }
+  .msg.lose { color:#ff4d6d; text-shadow: 0 0 22px rgba(255,77,109,.7); }
+  .msg.tie  { color:#ffd166; text-shadow: 0 0 22px rgba(255,209,102,.6); }
+  .msg.info { color:#9fb3ac; }
+
+  /* -------- แผงควบคุม -------- */
+  .controls {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .betRow, .actionRow {
+    display:flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .betRow label {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #6f8079;
+    font-weight: 700;
+  }
+
+  input[type=number] {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    width: 145px;
+    padding: 12px 14px;
+    text-align: center;
+    color: #00ffa3;
+    background: #0d0f13;
+    border: 1px solid rgba(0,255,163,.32);
+    border-radius: 11px;
+    outline: none;
+    font-variant-numeric: tabular-nums;
+    transition: .2s;
+  }
+  input[type=number]:focus {
+    border-color: #00ffa3;
+    box-shadow: 0 0 20px rgba(0,255,163,.28);
+  }
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  .chips { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .chip {
+    padding: 8px 15px;
+    font-size: 13px;
+    font-weight: 800;
+    border-radius: 9px;
+    background: rgba(0,255,163,.07);
+    border: 1px solid rgba(0,255,163,.3);
+    color: #00ffa3;
+    cursor: pointer;
+    transition: .18s;
+    letter-spacing: .5px;
+  }
+  .chip:hover { background: rgba(0,255,163,.18); box-shadow: 0 0 16px rgba(0,255,163,.3); }
+
+  @media (max-width: 520px) {
+    .table { gap: 26px; }
+    .side { min-width: 150px; }
+    .card { width: 62px; height: 90px; }
+    .card .rank { font-size: 21px; }
+    .card .suit { font-size: 17px; }
+    .modal { padding: 30px 22px; }
+    .logo { font-size: 22px; letter-spacing: 2px; }
+    .brand { font-size: 13px; letter-spacing: 2px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 1. หน้ายืนยัน ================= -->
+<div class="screen" id="confirmScreen">
+  <div class="modal">
+    <div class="logo">popjung999</div>
+    <p>คุณยืนยัน จะเข้า popjung999 หรือไม่</p>
+    <button id="confirmBtn">ยืนยัน</button>
+  </div>
+</div>
+
+<!-- ================= 2. หน้าเกม ================= -->
+<div class="screen" id="gameScreen" style="display:none;">
+  <header>
+    <div class="brand">popjung999</div>
+    <div class="balance">฿<span id="bal">100,000</span></div>
+  </header>
+
+  <main>
+    <div class="table">
+      <div class="side">
+        <div class="label">เจ้ามือ</div>
+        <div class="cards" id="dealerCards"></div>
+        <div class="score" id="dealerScore"></div>
+      </div>
+
+      <div class="side">
+        <div class="label">คุณ</div>
+        <div class="cards" id="playerCards"></div>
+        <div class="score" id="playerScore"></div>
+      </div>
+    </div>
+
+    <div class="msg" id="message"></div>
+
+    <div class="controls">
+      <div class="chips" id="chipRow">
+        <div class="chip" data-v="1000">1,000</div>
+        <div class="chip" data-v="5000">5,000</div>
+        <div class="chip" data-v="10000">10,000</div>
+        <div class="chip" data-v="50000">50,000</div>
+      </div>
+
+      <div class="betRow" id="betRow">
+        <label>เดิมพัน</label>
+        <input type="number" id="betInput" value="1000" min="1" step="1">
+        <button id="dealBtn">แจกไพ่</button>
+      </div>
+
+      <div class="actionRow" id="actionRow" style="display:none;">
+        <button id="drawBtn">จั่ว</button>
+        <button id="standBtn" class="btn-ghost">ไม่จั่ว</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =====================================================
+     ข้อมูลไพ่ — ป็อกเด้ง
+     A=1, 2-9 ตามหน้าไพ่, 10/J/Q/K = 0 (นับแต้มแบบ modulo 10)
+     ===================================================== */
+  const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  const SUITS = ['♠','♥','♦','♣'];
+  const VAL   = { 'A':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':0,'J':0,'Q':0,'K':0 };
+
+  /* =====================================================
+     ระบบบันทึกเงิน (localStorage) — ออกแล้วเข้าใหม่เงินไม่หาย
+     ===================================================== */
+  const STORAGE_KEY  = 'popjung999_balance';
+  const START_MONEY  = 100000;
+
+  function loadBalance() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw !== null) {
+        const n = Number(raw);
+        if (isFinite(n) && n >= 0) return Math.floor(n);
+      }
+    } catch (e) { /* โหมดส่วนตัวบางเบราว์เซอร์บล็อก localStorage */ }
+    return START_MONEY;
+  }
+
+  function saveBalance() {
+    try { localStorage.setItem(STORAGE_KEY, String(balance)); } catch (e) {}
+  }
+
+  /* ================= สถานะเกม ================= */
+  let balance     = loadBalance();
+  let currentBet  = 0;
+  let playerCards = [];
+  let dealerCards = [];
+  let phase       = 'idle';   // idle | playing | result
+
+  const $ = function (id) { return document.getElementById(id); };
+
+  function fmt(n) { return Number(n).toLocaleString('en-US'); }
+
+  /* ================= ฟังก์ชันไพ่ ================= */
+  function randCard() {
+    const r = RANKS[Math.floor(Math.random() * RANKS.length)];
+    const s = SUITS[Math.floor(Math.random() * SUITS.length)];
+    return { r: r, s: s, v: VAL[r] };
+  }
+
+  function cardWithValue(v) {
+    const opts = RANKS.filter(function (r) { return VAL[r] === v; });
+    const r = opts[Math.floor(Math.random() * opts.length)];
+    const s = SUITS[Math.floor(Math.random() * SUITS.length)];
+    return { r: r, s: s, v: VAL[r] };
+  }
+
+  function cardPoints(cards) {
+    let sum = 0;
+    for (let i = 0; i < cards.length; i++) sum += cards[i].v;
+    return sum % 10;
+  }
+
+  /* สร้างมือเจ้ามือให้ได้แต้มเป้าหมาย ตามกติกา "แต้ม < 6 ต้องจั่ว" */
+  function makeDealerHand(target) {
+    for (let i = 0; i < 12000; i++) {
+      const cards = [randCard(), randCard()];
+      let sum = cardPoints(cards);
+      if (sum < 6) {
+        cards.push(randCard());
+        sum = cardPoints(cards);
+      }
+      if (sum === target) return cards;
+    }
+    /* fallback (แทบไม่เกิด) */
+    const v1 = Math.floor(Math.random() * 10);
+    const v2 = (target - v1 + 10) % 10;
+    return [cardWithValue(v1), cardWithValue(v2)];
+  }
+
+  /* ================= เรนเดอร์ ================= */
+  function cardEl(card) {
+    const d = document.createElement('div');
+    d.className = 'card' + (card.s === '♥' || card.s === '♦' ? ' red' : '');
+    const rank = document.createElement('span');
+    rank.className = 'rank';
+    rank.textContent = card.r;
+    const suit = document.createElement('span');
+    suit.className = 'suit';
+    suit.textContent = card.s;
+    d.appendChild(rank);
+    d.appendChild(suit);
+    return d;
+  }
+
+  function renderPlayer() {
+    const el = $('playerCards');
+    el.innerHTML = '';
+    playerCards.forEach(function (c) { el.appendChild(cardEl(c)); });
+    $('playerScore').textContent = playerCards.length ? 'แต้ม ' + cardPoints(playerCards) : '';
+  }
+
+  function renderDealer() {
+    const el = $('dealerCards');
+    el.innerHTML = '';
+    dealerCards.forEach(function (c) { el.appendChild(cardEl(c)); });
+    $('dealerScore').textContent = dealerCards.length ? 'แต้ม ' + cardPoints(dealerCards) : '';
+  }
+
+  function renderDealerBacks(n) {
+    const el = $('dealerCards');
+    el.innerHTML = '';
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement('div');
+      d.className = 'card back';
+      el.appendChild(d);
+    }
+    $('dealerScore').textContent = '';
+  }
+
+  function showMsg(text, cls) {
+    const el = $('message');
+    el.textContent = text || '';
+    el.className = 'msg ' + (cls || '');
+  }
+
+  function updateBalance() {
+    $('bal').textContent = fmt(balance);
+    saveBalance();
+  }
+
+  /* =====================================================
+     หน้ายืนยัน → เข้าเกมทันที (ไม่มีหน้าคำถามแล้ว)
+     ===================================================== */
+  $('confirmBtn').addEventListener('click', function () {
+    $('confirmScreen').style.display = 'none';
+    $('gameScreen').style.display = 'flex';
+
+    updateBalance();
+    if (balance <= 0) {
+      showMsg('ยอดเงินหมดแล้ว', 'lose');
+    } else {
+      showMsg('เลือกเดิมพัน แล้วกด "แจกไพ่"', 'info');
+    }
+  });
+
+  /* =====================================================
+     ชิปเดิมพันด่วน
+     ===================================================== */
+  $('chipRow').addEventListener('click', function (e) {
+    const t = e.target.closest('.chip');
+    if (!t || phase !== 'idle') return;
+    $('betInput').value = t.getAttribute('data-v');
+  });
+
+  /* =====================================================
+     เริ่มรอบ — แจกไพ่
+     ===================================================== */
+  $('dealBtn').addEventListener('click', function () {
+    if (phase !== 'idle') return;
+
+    const bet = Math.floor(Number($('betInput').value));
+    if (!bet || bet <= 0) { showMsg('กรุณาใส่จำนวนเงินเดิมพันให้ถูกต้อง', 'lose'); return; }
+    if (bet > balance)   { showMsg('ยอดเงินไม่เพียงพอ', 'lose'); return; }
+
+    currentBet  = bet;
+    phase       = 'playing';
+    playerCards = [randCard(), randCard()];
+    dealerCards = [];
+
+    renderPlayer();
+    renderDealerBacks(2);
+    showMsg('', '');
+
+    $('betRow').style.display    = 'none';
+    $('chipRow').style.display   = 'none';
+    $('actionRow').style.display = 'none';
+    $('dealBtn').disabled        = true;
+
+    const p = cardPoints(playerCards);
+
+    if (p >= 8) {
+      /* ป็อก — จั่วไม่ได้ */
+      showMsg('คุณป็อกแล้ว ไม่สามารถจั่วได้', 'win');
+      setTimeout(function () { finishRound(); }, 1000);
+    } else {
+      showMsg('คุณต้องการจั่วหรือไม่', 'info');
+      $('actionRow').style.display = 'flex';
+    }
+  });
+
+  /* =====================================================
+     ปุ่มจั่ว / ไม่จั่ว
+     ===================================================== */
+  $('drawBtn').addEventListener('click', function () {
+    if (phase !== 'playing') return;
+    playerCards.push(randCard());
+    renderPlayer();
+    $('actionRow').style.display = 'none';
+    finishRound();
+  });
+
+  $('standBtn').addEventListener('click', function () {
+    if (phase !== 'playing') return;
+    $('actionRow').style.display = 'none';
+    finishRound();
+  });
+
+  /* =====================================================
+     สรุปผลรอบ
+     ===================================================== */
+  function finishRound() {
+    phase = 'result';
+
+    const pFinal = cardPoints(playerCards);
+
+    /* ---- ควบคุมผลลัพธ์: ผู้เล่นชนะประมาณ 80% ---- */
+    const winRoll = Math.random() < 0.8;
+    let dTarget;
+
+    if (winRoll) {
+      dTarget = pFinal > 0
+        ? Math.floor(Math.random() * pFinal)
+        : 0;
+    } else {
+      dTarget = pFinal < 9
+        ? pFinal + 1 + Math.floor(Math.random() * (9 - pFinal))
+        : 9;
+    }
+
+    dealerCards = makeDealerHand(dTarget);
+    renderDealer();
+
+    const dFinal = cardPoints(dealerCards);
+
+    /* ---- ตัดสิน ---- */
+    let text, cls;
+    if (pFinal > dFinal) {
+      balance += currentBet;
+      text = 'คุณชนะ!  +฿' + fmt(currentBet);
+      cls  = 'win';
+    } else if (pFinal < dFinal) {
+      balance -= currentBet;
+      if (balance < 0) balance = 0;
+      text = 'เจ้ามือชนะ  -฿' + fmt(currentBet);
+      cls  = 'lose';
+    } else {
+      text = 'เสมอ คืนเงินเดิมพัน';
+      cls  = 'tie';
+    }
+
+    updateBalance();   // บันทึกลง localStorage ทุกครั้งที่เงินเปลี่ยน
+    showMsg(text, cls);
+
+    /* ---- รีเซ็ตสำหรับรอบถัดไป ---- */
+    setTimeout(function () {
+      playerCards = [];
+      dealerCards = [];
+      $('playerCards').innerHTML = '';
+      $('dealerCards').innerHTML = '';
+      $('playerScore').textContent = '';
+      $('dealerScore').textContent = '';
+
+      $('betRow').style.display   = 'flex';
+      $('chipRow').style.display  = 'flex';
+      $('dealBtn').disabled       = false;
+      phase = 'idle';
+
+      if (balance <= 0) {
+        showMsg('ยอดเงินหมดแล้ว', 'lose');
+      } else {
+        showMsg('เลือกเดิมพัน แล้วกด "แจกไพ่"', 'info');
+      }
+    }, 2400);
+  }
+
+})();
+</script>
+</body>
+  </html>
